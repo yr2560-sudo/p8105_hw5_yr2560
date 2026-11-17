@@ -140,3 +140,58 @@ trial_df |>
   theme(legend.position = "none")
 ```
 The spaghetti plot shows different trends between the control and experimental groups over the eight weeks. The control group remains relatively stable, with some fluctuations among individual participants. Its mean observation decreases slightly from 0.92 in week 1 to 0.74 in week 8. In contrast, the experimental group shows a clear increasing trend, with the mean observation rising from 1.14 to 5.12. Although there is some variation between participants, the experimental group generally has higher observed values over time, especially in the later weeks.
+
+## Problem 3
+
+Function
+```{r}
+set.seed(2026)
+
+sim_ttest = function(mu, n_obs = 30, sigma = 5) {
+
+  sim_df =
+    tibble(
+      x = rnorm(n = n_obs, mean = mu, sd = sigma)
+    )
+
+  ttest_result =
+    t.test(sim_df$x, mu = 0)
+
+  return_df =
+    broom::tidy(ttest_result) |>
+    select(estimate, p.value) |>
+    rename(
+      mu_hat = estimate,
+      p_value = p.value
+    )
+
+  return(return_df)
+}
+```
+
+Simulations
+```{r}
+set.seed(1236)
+
+sim_results_df =
+  expand_grid(
+    mu = 0:6,
+    iter = 1:5000
+  ) |>
+  mutate(
+    results = map(mu, sim_ttest)
+  ) |>
+  unnest(results)
+
+sim_summary_df =
+  sim_results_df |>
+  group_by(mu) |>
+  summarize(
+    power = mean(p_value < 0.05),
+    mean_mu_hat = mean(mu_hat),
+    mean_mu_hat_rejected = mean(mu_hat[p_value < 0.05])
+  )
+
+sim_summary_df
+```
+
