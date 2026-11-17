@@ -1,11 +1,13 @@
 ---
 title: "Homework 5"
 author: "Yiman Rui"
-date: "2026-11-15"
+date: "2026-11-16"
 output: github_document
 ---
 
 ```{r setup, include=FALSE}
+library(tidyverse)
+
 knitr::opts_chunk$set(
   fig.width = 7,
   fig.asp = 0.6,
@@ -15,4 +17,52 @@ knitr::opts_chunk$set(
 set.seed(1236)
 ```
 
+## Problem 1
 
+```{r}
+# Birthday function from class
+birthday_repeated = function(n_room){
+  birthdays = sample(1:365, size = n_room, replace = TRUE)
+  
+  repeated_birthdays = length(unique(birthdays)) < n_room
+  
+  return(repeated_birthdays)
+}
+```
+
+```{r}
+birthday_results_df = 
+  expand_grid(
+    number_of_people = 2:50,
+    iter = 1:10000
+  ) |> 
+  mutate(
+    repeated = map_lgl(number_of_people, birthday_repeated)
+  )
+
+birthday_prob_df =
+  birthday_results_df |>
+  group_by(number_of_people) |>
+  summarize(
+    prob_of_repeat = mean(repeated)
+  )
+
+birthday_prob_df
+```
+
+Plot
+```{r}
+birthday_prob_df |> 
+  ggplot(aes(x = number_of_people, y = prob_of_repeat)) +
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Probability of Sharing a Birthday by Group Size",
+    x = "Number of People in the Room",
+    y = "Probability of Shared Birthday"
+  ) +
+  theme_minimal()
+
+```
+
+The probability of sharing a birthday increases as the number of people in the room increases. With around 23 people, the probability exceeds 50%, and it reaches approximately 97% with 50 people. The increase is nonlinear and gradually levels off as the probability approaches 1.
