@@ -66,3 +66,54 @@ birthday_prob_df |>
 ```
 
 The probability of sharing a birthday increases as the number of people in the room increases. With around 23 people, the probability exceeds 50%, and it reaches approximately 97% with 50 people. The increase is nonlinear and gradually levels off as the probability approaches 1.
+
+## Problem 2
+```{r}
+trial_files = tibble(
+  file_name = list.files(
+    path = "data",
+    pattern = "\\.csv$",
+    full.names = TRUE,
+    recursive = TRUE
+  )
+)
+
+trial_df = trial_files |>
+  mutate(
+    subject = str_remove(basename(file_name), "\\.csv$"),
+    arm = case_when(
+      str_detect(subject, "^con_") ~ "Control",
+      str_detect(subject, "^exp_") ~ "Experimental"
+    ),
+    subject_id = str_remove(subject, "^(con|exp)_"),
+    measurements = purrr::map(
+      file_name,
+      ~read_csv(.x, show_col_types = FALSE)
+    )
+  ) |>
+  select(subject_id, arm, measurements) |>
+  unnest(cols = measurements) |>
+  pivot_longer(
+    cols = starts_with("week_"),
+    names_to = "week",
+    names_prefix = "week_",
+    values_to = "observation"
+  ) |>
+  mutate(week = as.integer(week)) |>
+  arrange(arm, subject_id, week)
+
+head(trial_df)
+```
+
+```{r}
+trial_df |>
+  count(arm)
+
+trial_df |>
+  group_by(arm, week) |>
+  summarize(
+    mean_observation = mean(observation),
+    .groups = "drop"
+  )
+```
+
