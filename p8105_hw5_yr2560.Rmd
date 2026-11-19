@@ -65,7 +65,7 @@ birthday_prob_df |>
 
 ```
 
-The probability of sharing a birthday increases as the number of people in the room increases. With around 23 people, the probability exceeds 50%, and it reaches approximately 97% with 50 people. The increase is nonlinear and gradually levels off as the probability approaches 1.
+The probability that at least two people share a birthday increases with group size. With around 23 people, the probability exceeds 50%, and it reaches approximately 97% with 50 people. The increase is nonlinear and gradually levels off as the probability approaches 1.
 
 ## Problem 2
 ```{r}
@@ -107,9 +107,11 @@ head(trial_df)
 
 ```{r}
 trial_df |>
+  distinct(arm, subject_id) |>
   count(arm)
 
 trial_df |>
+  filter(week %in% c(1, 8)) |>
   group_by(arm, week) |>
   summarize(
     mean_observation = mean(observation),
@@ -139,7 +141,7 @@ trial_df |>
   theme_minimal() +
   theme(legend.position = "none")
 ```
-The spaghetti plot shows different trends between the control and experimental groups over the eight weeks. The control group remains relatively stable, with some fluctuations among individual participants. Its mean observation decreases slightly from 0.92 in week 1 to 0.74 in week 8. In contrast, the experimental group shows a clear increasing trend, with the mean observation rising from 1.14 to 5.12. Although there is some variation between participants, the experimental group generally has higher observed values over time, especially in the later weeks.
+The spaghetti plot shows different trends between the two groups over eight weeks. The control group remains relatively stable, with its mean observation decreasing slightly from 0.92 to 0.74. In contrast, the experimental group shows an increasing trend, with the mean rising from 1.14 to 5.12. Although individual observations vary, the experimental group generally shows greater increases over time.
 
 ## Problem 3
 
